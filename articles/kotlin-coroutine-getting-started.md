@@ -24,7 +24,7 @@ KotlinのCoroutineによって、Kotlinのコードを中断・再開可能な�
 
 例えば次のように書きます。
 
-```
+``` kotlin
 package booookstore.playground
 
 import kotlinx.coroutines.delay

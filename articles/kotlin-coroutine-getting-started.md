@@ -60,3 +60,64 @@ class HelloCoroutineTest {
 **#3** `delay` はsuspend関数の一つです。suspend関数は現在のCoroutineを中断する関数です。ここでは0.1秒Coroutineを中断します。0.1秒後（正確には0.1秒後Coroutineがいずれかのスレッドに割り当てられてから）再開します。
 
 上記のプログラムは <1> <2> <3> の順序でmessage変数にアクセスし、最後のアサーションに成功します。
+
+# CoroutineBuilder
+
+[launch](https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/launch.html) と [async](https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/async.html) はそれぞれ代表的なCoroutineBuilderです。
+
+`launch` は `Job` を返します。 `join` を使うことでCoroutineの完了を待機できます。
+
+``` kotlin
+package booookstore.playground
+
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
+
+class JobTest {
+
+    @Test
+    fun job() = runBlocking {
+        var message = ""
+        val job = launch {
+            delay(100L)
+            message += "hello"
+        }
+        job.join()
+        assertEquals("hello", message)
+    }
+
+}
+```
+
+`Job` はCoroutineの計算結果を持っていません。つまり、 `launch` は計算結果を返す必要のないCoroutineを生成します。
+
+一方で `async` は `Deffered` を返します。 Coroutineの完了後に `getCompleted` を呼び出せば計算結果を受け取れます。
+
+``` kotlin
+package booookstore.playground
+
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
+
+@OptIn(ExperimentalCoroutinesApi::class)
+class AsyncTest {
+
+    @Test
+    fun async() = runBlocking {
+        val deferred = async {
+            delay(100L)
+            "hello"
+        }
+        deferred.join()
+        assertEquals("hello", deferred.getCompleted())
+    }
+
+}
+```

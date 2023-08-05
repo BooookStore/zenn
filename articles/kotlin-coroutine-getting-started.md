@@ -53,7 +53,7 @@ class HelloCoroutineTest {
 }
 ```
 
-**#1** `runBlocking`  はCoroutineBuilderというものです。Builderと呼ばれるとおりCoroutineを作成します。 `runBlock` はNone-Coroutineの世界からCoroutineの世界へのエントリポイントです。`{ }` の内部ではCoroutineを自由に生成することができます。Blockingと呼ばれるとおり、Coroutineの実行完了まで現在のスレッドをブロックします。言い換えるとCoroutineの実行が完了するまでスレッドは次のコードを実行しません。
+**#1** `runBlocking` はCoroutineBuilderというものです。Builderと呼ばれるとおりCoroutineを作成します。 `runBlock` はNone-Coroutineの世界からCoroutineの世界へのエントリポイントです。`{ }` の内部ではCoroutineを自由に生成することができます。Blockingと呼ばれるとおり、Coroutineの実行完了まで現在のスレッドをブロックします。言い換えるとCoroutineの実行が完了するまでスレッドは次のコードを実行しません。
 
 **#2** `launch` もCoroutineBuilderの一つです。そう、CoroutineBuilderは複数登場しそれぞれ役割が少々違います。 `launch` はCoroutineを新しく生成しますが現在のスレッドをブロックしません。suspend関数によって実行が中断されると現在のスレッドを開放します。開放されたスレッドは他の仕事をすることができます。
 
@@ -64,6 +64,11 @@ class HelloCoroutineTest {
 # CoroutineBuilder
 
 [launch](https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/launch.html) と [async](https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/async.html) はそれぞれ代表的なCoroutineBuilderです。
+
+|CoroutineBuilder|戻り値|計算結果|
+|:--|:--|:--|
+|launch|Job|計算結果を返さない|
+|async|Deffered|計算結果を返す|
 
 `launch` は `Job` を返します。 `join` を使うことでCoroutineの完了を待機できます。
 
@@ -94,7 +99,7 @@ class JobTest {
 
 `Job` はCoroutineの計算結果を持っていません。つまり、 `launch` は計算結果を返す必要のないCoroutineを生成します。
 
-一方で `async` は `Deffered` を返します。 Coroutineの完了後に `getCompleted` を呼び出せば計算結果を受け取れます。
+一方で `async` は `Deffered` を返します。`Deffered`も`Job`と同様に`join`により完了を待機できます。Coroutineの完了後に `getCompleted` を呼び出せば計算結果を受け取れます。
 
 ``` kotlin
 package booookstore.playground
@@ -117,6 +122,65 @@ class AsyncTest {
         }
         deferred.join()
         assertEquals("hello", deferred.getCompleted())
+    }
+
+}
+```
+
+`Job` や `Deffered` が複数ある場合はリストにしてすべての完了を待機することもできます。
+
+``` kotlin
+package booookstore.playground
+
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
+
+class JobTest {
+
+    @Test
+    fun job() = runBlocking {
+        var message = ""
+        val jobA = launch {
+            delay(100L)
+            message += "hello"
+        }
+        val jobB = launch {
+            delay(200L)
+            message += ",world"
+        }
+        listOf(jobA, jobB).joinAll()
+        assertEquals("hello,world", message)
+    }
+}
+```
+
+``` kotlin
+package booookstore.playground
+
+import kotlinx.coroutines.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
+
+@OptIn(ExperimentalCoroutinesApi::class)
+class AsyncTest {
+
+    @Test
+    fun async() = runBlocking {
+        val deferredA = async {
+            delay(100L)
+            "hello"
+        }
+        val deferredB = async {
+            delay(100L)
+            "world"
+        }
+        listOf(deferredA, deferredB).joinAll()
+        assertEquals("hello", deferredA.getCompleted())
+        assertEquals("world", deferredB.getCompleted())
     }
 
 }

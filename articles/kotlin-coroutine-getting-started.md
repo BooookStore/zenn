@@ -129,6 +129,8 @@ class AsyncTest {
 
 `Job` や `Deffered` が複数ある場合はリストにしてすべての完了を待機することもできます。
 
+次は `Job` が複数ある場合のケースです。
+
 ``` kotlin
 package booookstore.playground
 
@@ -158,6 +160,8 @@ class JobTest {
 }
 ```
 
+次は `Deffered` が複数ある場合のケースです。
+
 ``` kotlin
 package booookstore.playground
 
@@ -184,4 +188,18 @@ class AsyncTest {
     }
 
 }
+```
+
+サンプルコードでは伝わりづらいですがCoroutineを任意の数作成することはよくあることだと思うので上記のやり方を覚えておくと良さそうです。
+
+# Suspend function
+
+Coroutine内ではSuspend functionを使うことができます。逆に言うと、Coroutine以外ではSuspend functionを使うことはできません。Suspend functionは中断可能な関数で、例えばネットワーク通信やIOの処理などで処理を中断します。例えば上記の例だと `delay` はSuspend functionです。
+
+Coroutineは中断されると現在のスレッドを開放します。スレッドの開放がCoroutineを使う、使わないで変わってくる大きなポイントだと思います。Coroutine無しでIO処理などを行うとスレッドをブロックするためそのスレッドは何も仕事をせず待機する事になります。一方、Coroutineの場合スレッドを開放するので、開放されたスレッドは他の処理を行えます。よって、スループットが向上する事に繋がります。
+
+Suspend functionを使用するコードを関数に切り出す場合、その関数もまたSuspend functionと名乗る必要が有ります。
+
+``` kotlin
+
 ```

@@ -200,7 +200,7 @@ Coroutineは中断されると現在のスレッドを開放します。スレ�
 
 Suspend functionを使用するコードを関数に切り出す場合、その関数もまたSuspend functionと名乗る必要が有り、先頭に `suspend` と宣言します。
 
-次のコードでは２つのSuspend functionを定義しています。Suspend functionからSuspend functionを呼び出すことができるため、 `message1` は `message2` を呼び出しています。
+次のコードでは２つのSuspend functionを定義しています。Suspend functionからSuspend functionを呼び出すことができるため、 `message1` は `message2` を呼び出しています。この例では合計で0.2秒関数が中断されます。 `message1` は単に `message2` を呼び出しているだけなのでdelayで指定した時間の合計が中断される時間の合計と一致するというわけです。
 
 ``` kotlin
 package booookstore.playground
@@ -231,3 +231,5 @@ class SuspendFunctionTest {
 
 }
 ```
+
+# CoroutineScope

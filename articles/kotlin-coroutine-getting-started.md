@@ -61,6 +61,10 @@ class HelloCoroutineTest {
 
 上記のプログラムは <1> <2> <3> の順序でmessage変数にアクセスし、最後のアサーションに成功します。
 
+大雑把なイメージにすると以下となります。
+
+![](/images/coroutine-A.png)
+
 # CoroutineBuilder
 
 [launch](https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/launch.html) と [async](https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/async.html) はそれぞれ代表的なCoroutineBuilderです。

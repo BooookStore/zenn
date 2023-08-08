@@ -194,12 +194,40 @@ class AsyncTest {
 
 # Suspend function
 
-Coroutine内ではSuspend functionを使うことができます。逆に言うと、Coroutine以外ではSuspend functionを使うことはできません。Suspend functionは中断可能な関数で、例えばネットワーク通信やIOの処理などで処理を中断します。例えば上記の例だと `delay` はSuspend functionです。
+Coroutine内ではSuspend functionを使うことができます。また他のSuspend functionからも使うことができます（以下のサンプルコードを参照）。Suspend functionは中断可能な関数で、例えばネットワーク通信やIOの処理などで処理を中断します。例えば上記の例だと `delay` はSuspend functionです。
 
 Coroutineは中断されると現在のスレッドを開放します。スレッドの開放がCoroutineを使う、使わないで変わってくる大きなポイントだと思います。Coroutine無しでIO処理などを行うとスレッドをブロックするためそのスレッドは何も仕事をせず待機する事になります。一方、Coroutineの場合スレッドを開放するので、開放されたスレッドは他の処理を行えます。よって、スループットの向上に繋がります。
 
-Suspend functionを使用するコードを関数に切り出す場合、その関数もまたSuspend functionと名乗る必要が有ります。
+Suspend functionを使用するコードを関数に切り出す場合、その関数もまたSuspend functionと名乗る必要が有り、先頭に `suspend` と宣言します。
+
+次のコードでは２つのSuspend functionを定義しています。Suspend functionからSuspend functionを呼び出すことができるため、 `message1` は `message2` を呼び出しています。
 
 ``` kotlin
+package booookstore.playground
 
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
+
+class SuspendFunctionTest {
+
+    @Test
+    fun suspendFunctionTest() = runBlocking {
+        val message = message1()
+        assertEquals("hello world", message)
+    }
+
+    private suspend fun message1(): String {
+        delay(100L)
+        val message = message2()
+        return "hello$message"
+    }
+
+    private suspend fun message2(): String {
+        delay(100L)
+        return " world"
+    }
+
+}
 ```

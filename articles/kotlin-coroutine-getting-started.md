@@ -204,9 +204,9 @@ class AsyncTest {
 
 # Suspend function
 
-Coroutine内ではSuspend functionを使うことができます。また他のSuspend functionからも使うことができます（以下のサンプルコードを参照）。Suspend functionは中断可能な関数で、例えばネットワーク通信やIOの処理などで処理を中断します。例えば上記の例だと `delay` はSuspend functionです。
+後述するCoroutineScope内でSuspend functionを呼び出すことができます。さらに、他のSuspend functionからもSuspend functionを呼び出すことができます（以下のサンプルコードを参照）。Suspend functionは中断可能な関数で、例えばネットワーク通信やIOの処理などで処理を中断します。例えば上記の例だと `delay` はSuspend functionです。
 
-Coroutineは中断されると現在のスレッドを開放します。スレッドの開放がCoroutineを使う、使わないで変わってくる大きなポイントだと思います。Coroutine無しでIO処理などを行うとスレッドをブロックするためそのスレッドは何も仕事をせず待機する事になります。一方、Coroutineの場合スレッドを開放するので、開放されたスレッドは他の処理を行えます。よって、スループットの向上に繋がります。
+Suspend functionによって中断されるとCoroutineは現在のスレッドを開放します。このスレッドの開放がパフォーマンスにおいて重要な点になります。Coroutine無しでIO処理などを行うとスレッドをブロックするためその間スレッドは何も仕事をせず待機する事になります。一方、Coroutineの場合スレッドを開放するので、開放されたスレッドは他の処理に割り当てることができます。
 
 Suspend functionを使用するコードを関数に切り出す場合、その関数もまたSuspend functionと名乗る必要が有り、先頭に `suspend` と宣言します。
 

@@ -20,6 +20,12 @@ https://ja.wikipedia.org/wiki/%E3%82%B3%E3%83%AB%E3%83%BC%E3%83%81%E3%83%B3
 
 KotlinのCoroutineによって、Kotlinのコードを中断・再開可能な単位に構成することができるようになります。それだけではなく、中断したCoroutineが再開するスレッドは異なっても良いためCPUのコアを効率的に使用でき、スループットの向上が期待できます。IO待ちが発生する状況や大量の計算を非同期処理したい場合に役立ちそうですね。
 
+少しの期間触ってみて感じたことは、次の３要素がKotlin Coroutineにおける主要登場人物であることです。
+
+- Coroutine Builder
+- Suspend Function
+- Coroutine Scope
+
 # Hello, Coroutine!
 
 例えば次のように書きます。
@@ -237,3 +243,12 @@ class SuspendFunctionTest {
 ```
 
 # CoroutineScope
+
+CoroutineScopeは名前から想像できる通り、Coroutineが存在できるスコープのことになります。CoroutineScopeは概念ではなく、インターフェイスとしてコード上に存在します。 `launch` や `async` といった関数は `CoroutineScope` に対する拡張関数として定義されています。なので、Coroutineを作成する `launch` や `async` はCoroutineScopeがないと呼び出すことができません。
+
+- [API Reference - kotlinx.coroutines.CoroutineScope](https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/-coroutine-scope/)
+
+CoroutineScopeは `runBlocking` や `coroutineScope` から作成できます。どちらもCoroutineの実行が終わるまで処理を止めますが、 `runBlocking` は元なるスレッドを開放しません。一方、 `coroutineScope` はスレッドを開放します。このような違いから `runBlocking` はCoroutineの世界へのエントリポイントとしての役割を持っています。main関数やテストの中で呼び出す想定をしています。Coroutineの世界で `runBlocking` を呼び出してしまうと元となるスレッドを開放してくれないため、Coroutineであるべきメリットを握りつぶしてしまうことになります。Coroutineの世界では `coroutienScope` を使うべきです。
+
+- [API Reference - kotlinx.coroutines.launch](https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/launch.html)
+- [API Reference - kotlinx.coroutines.async](https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/async.html)

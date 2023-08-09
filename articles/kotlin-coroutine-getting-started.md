@@ -247,8 +247,20 @@ class SuspendFunctionTest {
 CoroutineScopeは名前から想像できる通り、Coroutineが存在できるスコープのことになります。CoroutineScopeは概念ではなく、インターフェイスとしてコード上に存在します。 `launch` や `async` といった関数は `CoroutineScope` に対する拡張関数として定義されています。なので、Coroutineを作成する `launch` や `async` はCoroutineScopeがないと呼び出すことができません。
 
 - [API Reference - kotlinx.coroutines.CoroutineScope](https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/-coroutine-scope/)
-
-CoroutineScopeは `runBlocking` や `coroutineScope` から作成できます。どちらもCoroutineの実行が終わるまで処理を止めますが、 `runBlocking` は元なるスレッドを開放しません。一方、 `coroutineScope` はスレッドを開放します。このような違いから `runBlocking` はCoroutineの世界へのエントリポイントとしての役割を持っています。main関数やテストの中で呼び出す想定をしています。Coroutineの世界で `runBlocking` を呼び出してしまうと元となるスレッドを開放してくれないため、Coroutineであるべきメリットを握りつぶしてしまうことになります。Coroutineの世界では `coroutienScope` を使うべきです。
-
 - [API Reference - kotlinx.coroutines.launch](https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/launch.html)
 - [API Reference - kotlinx.coroutines.async](https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/async.html)
+
+CoroutineScopeは `runBlocking` や `coroutineScope` から作成できます。CoroutineScopeを作成する関数をScopeBuilderと言います。CoroutineBuilderと比較すると以下のようなイメージです。
+
+|名前|作るもの|
+|:--|:--|
+|CoroutineBuilder|Coroutine|
+|ScopeBuilder|CoroutineScope|
+
+
+`runBlocking` と `coroutineScope` はどちらもCoroutineの実行が終わるまで呼び出し元の処理を止めますが、 `runBlocking` は元なるスレッドを開放しません。一方、 `coroutineScope` はスレッドを開放します。このような違いから `runBlocking` はCoroutineの世界へのエントリポイントとしての役割を持っています。main関数やテストの中で呼び出す想定をしています。Coroutineの世界で `runBlocking` を呼び出してしまうと元となるスレッドを開放してくれないため、Coroutineであるべきメリットを握りつぶしてしまうことになります。Coroutineの世界では `coroutienScope` を使うべきです。
+
+- [API Reference - kotlinx.coroutines.run-blocking](https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/run-blocking.html)
+- [API Reference - kotlinx.coroutines.coroutine-scope](https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/coroutine-scope.html)
+
+分かりづらいので実際のコードを見たほうがイメージがつかめると思います。

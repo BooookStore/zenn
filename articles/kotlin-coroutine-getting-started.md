@@ -264,3 +264,34 @@ CoroutineScopeは `runBlocking` や `coroutineScope` から作成できます。
 - [API Reference - kotlinx.coroutines.coroutine-scope](https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/coroutine-scope.html)
 
 分かりづらいので実際のコードを見たほうがイメージがつかめると思います。
+
+``` kotlin
+package booookstore.playground
+
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
+
+class CoroutineScopeTest {
+
+    @Test
+    fun coroutineScope() = runBlocking { // #1
+        val message = otherCoroutineScope()
+        println("receive message from otherCoroutineScope")
+        assertEquals("hello", message)
+    }
+
+    private suspend fun otherCoroutineScope(): String = coroutineScope { // #2
+        println("entry otherCoroutineScope")
+        val deferred = async {
+            delay(100L)
+            "hello"
+        }
+        deferred.await()
+    }
+
+}
+```

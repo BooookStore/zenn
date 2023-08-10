@@ -73,12 +73,17 @@ class HelloCoroutineTest {
 
 # CoroutineBuilder
 
-[launch](https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/launch.html) と [async](https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/async.html) はそれぞれ代表的なCoroutineBuilderです。
+CoroutineBuilderはCoroutineを新しく作成します。[runBlocking](https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/run-blocking.html)、[launch](https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/launch.html) 、 [async](https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/async.html) はそれぞれ代表的なCoroutineBuilderです。
 
 |CoroutineBuilder|戻り値|計算結果|
 |:--|:--|:--|
 |launch|Job|計算結果を返さない|
 |async|Deffered|計算結果を返す|
+|runBlocking|任意|計算結果を返す|
+
+CoroutineBuilderがCoroutineを作成するイメージはこんな感じになります。
+
+![](/images/coroutine-B.png)
 
 `launch` は `Job` を返します。 `join` を使うことでCoroutineの完了を待機できます。
 
@@ -246,9 +251,13 @@ class SuspendFunctionTest {
 
 CoroutineScopeは名前から想像できる通り、Coroutineが存在できるスコープのことになります。Coroutineが存在するならば、必ずCoroutineScopeも同時に存在することになります。CoroutineScope自体は概念ではなく、インターフェイスとして存在します。
 
+![](/images/coroutine-C.png)
+
 - [API Reference - kotlinx.coroutines.CoroutineScope](https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/-coroutine-scope/)
 
 `launch` や `async` といった関数は `CoroutineScope` に対する拡張関数として定義されています。なので、Coroutineを作成する `launch` や `async` はCoroutineScope内にて呼び出すことが強制されます。また、これら２つの関数は `CoroutineScope` をレシーバーとして持つ関数を引数で受け取ります。２つの関数はCoroutineBuilderなのでCoroutineを作成し、その上で何をするのかを引数で受け取ることができるというわけですね。
+
+![](/images/coroutine-D.png)
 
 - [API Reference - kotlinx.coroutines.launch](https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/launch.html)
 
@@ -269,6 +278,43 @@ fun <T> CoroutineScope.async(
     block: suspend CoroutineScope.() -> T
 ): Deferred<T>
 ```
+
+ここまでの話だと「Coroutineには一つのCoroutineScopeしか存在しないので意識する必要がないのでは？」と思うかもしれません。しかし、 `coroutineScope` 関数を使うことで一つのCoroutineの中に複数のCoroutineScopeを持つことができます。
+
+例えば、次の例では２つのCoroutineScopeが１つのCoroutineの中に存在しています。
+
+```kotlin
+package booookstore.playground
+
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
+
+@Suppress("NonAsciiCharacters")
+class CoroutineScopeTest {
+
+    @Test
+    fun coroutineScope() = runBlocking {
+        val message = secondCoroutineScope()
+        assertEquals("hello", message)
+    }
+
+    private suspend fun secondCoroutineScope(): String = coroutineScope {
+        async {
+            delay(100L)
+            "hello"
+        }.await()
+    }
+
+}
+```
+
+図にすると以下のようなイメージになります。
+
+![](/images/coroutine-E.png)
 
 `runBlocking` と `coroutineScope` はどちらもCoroutineの実行が終わるまで呼び出し元の処理を止めますが、 `runBlocking` は元なるスレッドを開放しません。一方、 `coroutineScope` はスレッドを開放します。このような違いから `runBlocking` はCoroutineの世界へのエントリポイントとしての役割を持っています。main関数やテストの中で呼び出す想定をしています。Coroutineの世界で `runBlocking` を呼び出してしまうと元となるスレッドを開放してくれないため、Coroutineであるべきメリットを握りつぶしてしまうことになります。Coroutineの世界では `coroutienScope` を使うべきです。
 

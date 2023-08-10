@@ -3,7 +3,7 @@ title: "KotlinのCoroutineを試しに使ってみる"
 emoji: "🏝️"
 type: "tech"
 topics: ["kotlin", "coroutine"]
-published: false
+published: true
 ---
 
 KotlinにはCoroutineと呼ばれるものがあるので、今回はこちらを使ってみます。
@@ -245,6 +245,17 @@ class SuspendFunctionTest {
     }
 
 }
+```
+
+一方で下記のようにすることで0.1秒の中断で済みます。２回のSuspend functionの呼び出しをそれぞれ別々のCoroutineで行っているので一つのスレッドが片方が中断されている間にもう片方の処理を継続できるからです。
+
+```kotlin
+    @Test
+    fun suspendFunction2Test() = runBlocking {
+        val deferredA = async { message2() }
+        val deferredB = async { message2() }
+        assertEquals(" world world", deferredA.await() + deferredB.await())
+    }
 ```
 
 # CoroutineScope

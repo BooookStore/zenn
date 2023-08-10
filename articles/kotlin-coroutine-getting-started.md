@@ -30,7 +30,7 @@ KotlinのCoroutineによって、Kotlinのコードを中断・再開可能な�
 
 例えば次のように書きます。
 
-``` kotlin
+```kotlin
 package booookstore.playground
 
 import kotlinx.coroutines.delay
@@ -82,7 +82,7 @@ class HelloCoroutineTest {
 
 `launch` は `Job` を返します。 `join` を使うことでCoroutineの完了を待機できます。
 
-``` kotlin
+```kotlin
 package booookstore.playground
 
 import kotlinx.coroutines.delay
@@ -111,7 +111,7 @@ class JobTest {
 
 一方で `async` は `Deffered` を返します。`Deffered`も`Job`と同様に`join`により完了を待機できます。Coroutineの完了後に `getCompleted` を呼び出せば計算結果を受け取れます。
 
-``` kotlin
+```kotlin
 package booookstore.playground
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -141,7 +141,7 @@ class AsyncTest {
 
 次は `Job` が複数ある場合のケースです。
 
-``` kotlin
+```kotlin
 package booookstore.playground
 
 import kotlinx.coroutines.delay
@@ -172,7 +172,7 @@ class JobTest {
 
 次は `Deffered` が複数ある場合のケースです。
 
-``` kotlin
+```kotlin
 package booookstore.playground
 
 import kotlinx.coroutines.*
@@ -212,7 +212,7 @@ Suspend functionを使用するコードを関数に切り出す場合、その�
 
 次のコードでは２つのSuspend functionを定義しています。Suspend functionからSuspend functionを呼び出すことができるため、 `message1` は `message2` を呼び出しています。この例では合計で0.2秒関数が中断されます。 `message1` は単に `message2` を呼び出しているだけなのでdelayで指定した時間の合計が中断される時間の合計と一致するというわけです。
 
-``` kotlin
+```kotlin
 package booookstore.playground
 
 import kotlinx.coroutines.delay
@@ -244,19 +244,31 @@ class SuspendFunctionTest {
 
 # CoroutineScope
 
-CoroutineScopeは名前から想像できる通り、Coroutineが存在できるスコープのことになります。CoroutineScopeは概念ではなく、インターフェイスとしてコード上に存在します。 `launch` や `async` といった関数は `CoroutineScope` に対する拡張関数として定義されています。なので、Coroutineを作成する `launch` や `async` はCoroutineScopeがないと呼び出すことができません。
+CoroutineScopeは名前から想像できる通り、Coroutineが存在できるスコープのことになります。Coroutineが存在するならば、必ずCoroutineScopeも同時に存在することになります。CoroutineScope自体は概念ではなく、インターフェイスとして存在します。
 
 - [API Reference - kotlinx.coroutines.CoroutineScope](https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/-coroutine-scope/)
+
+`launch` や `async` といった関数は `CoroutineScope` に対する拡張関数として定義されています。なので、Coroutineを作成する `launch` や `async` はCoroutineScope内にて呼び出すことが強制されます。また、これら２つの関数は `CoroutineScope` をレシーバーとして持つ関数を引数で受け取ります。２つの関数はCoroutineBuilderなのでCoroutineを作成し、その上で何をするのかを引数で受け取ることができるというわけですね。
+
 - [API Reference - kotlinx.coroutines.launch](https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/launch.html)
+
+```kotlin
+fun CoroutineScope.launch(
+    context: CoroutineContext = EmptyCoroutineContext, 
+    start: CoroutineStart = CoroutineStart.DEFAULT, 
+    block: suspend CoroutineScope.() -> Unit
+): Job
+```
+
 - [API Reference - kotlinx.coroutines.async](https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/async.html)
 
-CoroutineScopeは `runBlocking` や `coroutineScope` から作成できます。CoroutineScopeを作成する関数をScopeBuilderと言います。CoroutineBuilderと比較すると以下のようなイメージです。
-
-|名前|作るもの|
-|:--|:--|
-|CoroutineBuilder|Coroutine|
-|ScopeBuilder|CoroutineScope|
-
+```kotlin
+fun <T> CoroutineScope.async(
+    context: CoroutineContext = EmptyCoroutineContext, 
+    start: CoroutineStart = CoroutineStart.DEFAULT, 
+    block: suspend CoroutineScope.() -> T
+): Deferred<T>
+```
 
 `runBlocking` と `coroutineScope` はどちらもCoroutineの実行が終わるまで呼び出し元の処理を止めますが、 `runBlocking` は元なるスレッドを開放しません。一方、 `coroutineScope` はスレッドを開放します。このような違いから `runBlocking` はCoroutineの世界へのエントリポイントとしての役割を持っています。main関数やテストの中で呼び出す想定をしています。Coroutineの世界で `runBlocking` を呼び出してしまうと元となるスレッドを開放してくれないため、Coroutineであるべきメリットを握りつぶしてしまうことになります。Coroutineの世界では `coroutienScope` を使うべきです。
 
@@ -295,3 +307,10 @@ class CoroutineScopeTest {
 
 }
 ```
+
+# 代表的な関数の違い
+
+|launch|開放する|完了を待たない
+|async|開放する|完了を待たない
+|runBlocking|開放しない|完了を待つ
+|coroutineScope|開放する|完了を待つ

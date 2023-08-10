@@ -321,42 +321,13 @@ class CoroutineScopeTest {
 - [API Reference - kotlinx.coroutines.run-blocking](https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/run-blocking.html)
 - [API Reference - kotlinx.coroutines.coroutine-scope](https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/coroutine-scope.html)
 
-分かりづらいので実際のコードを見たほうがイメージがつかめると思います。
-
-``` kotlin
-package booookstore.playground
-
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Test
-
-class CoroutineScopeTest {
-
-    @Test
-    fun coroutineScope() = runBlocking { // #1
-        val message = otherCoroutineScope()
-        println("receive message from otherCoroutineScope")
-        assertEquals("hello", message)
-    }
-
-    private suspend fun otherCoroutineScope(): String = coroutineScope { // #2
-        println("entry otherCoroutineScope")
-        val deferred = async {
-            delay(100L)
-            "hello"
-        }
-        deferred.await()
-    }
-
-}
-```
-
 # 代表的な関数の違い
 
-|launch|開放する|完了を待たない
-|async|開放する|完了を待たない
-|runBlocking|開放しない|完了を待つ
-|coroutineScope|開放する|完了を待つ
+ここまで登場した関数の違いを整理しました。
+
+|関数|元となるスレッドを開放|呼び出し元はCoroutine完了を|新しくCoroutineを作成|
+|:--|:--|:--|:--|
+|launch|する|待たない|する|
+|async|する|待たない|する|
+|runBlocking|しない|待つ|する|
+|coroutineScope|する|待つ|しない|

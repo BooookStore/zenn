@@ -279,7 +279,7 @@ fun <T> CoroutineScope.async(
 ): Deferred<T>
 ```
 
-ここまでの話だと「Coroutineには一つのCoroutineScopeしか存在しないので意識する必要がないのでは？」と思うかもしれません。しかし、 `coroutineScope` 関数を使うことで一つのCoroutineの中に複数のCoroutineScopeを持つことができます。
+ここまでの話だと「Coroutineには一つのCoroutineScopeしか存在しないので意識する必要がないのでは？」と思うかもしれません。しかし、 `coroutineScope` 関数を使うことで一つのCoroutineの中に複数のCoroutineScopeを持つことができます。CoroutineScopeを作成する関数をScopeBuilderと言います。
 
 例えば、次の例では２つのCoroutineScopeが１つのCoroutineの中に存在しています。
 
@@ -316,7 +316,7 @@ class CoroutineScopeTest {
 
 ![](/images/coroutine-E.png)
 
-`runBlocking` と `coroutineScope` はどちらもCoroutineの実行が終わるまで呼び出し元の処理を止めますが、 `runBlocking` は元なるスレッドを開放しません。一方、 `coroutineScope` はスレッドを開放します。このような違いから `runBlocking` はCoroutineの世界へのエントリポイントとしての役割を持っています。main関数やテストの中で呼び出す想定をしています。Coroutineの世界で `runBlocking` を呼び出してしまうと元となるスレッドを開放してくれないため、Coroutineであるべきメリットを握りつぶしてしまうことになります。Coroutineの世界では `coroutienScope` を使うべきです。
+`runBlocking` もScopeBuilderです。`runBlocking` `coroutineScope` はどちらもCoroutineの実行が終わるまで呼び出し元の処理を止めますが、 `runBlocking` は元なるスレッドを開放しません。一方、 `coroutineScope` はスレッドを開放します。このような違いから `runBlocking` はCoroutineの世界へのエントリポイントとしての役割を持っています。main関数やテストの中で呼び出す想定をしています。Coroutineの世界で `runBlocking` を呼び出してしまうと元となるスレッドを開放してくれないため、Coroutineであるべきメリットを握りつぶしてしまうことになります。Coroutineの世界では `coroutienScope` を使うべきです。
 
 - [API Reference - kotlinx.coroutines.run-blocking](https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/run-blocking.html)
 - [API Reference - kotlinx.coroutines.coroutine-scope](https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/coroutine-scope.html)
